@@ -1,4 +1,6 @@
 library(tidyverse)
+library(viridis)
+
 
 df <- data.table::fread("medicine_prices.csv")
 
@@ -6,7 +8,7 @@ df <- data.table::fread("medicine_prices.csv")
 # simple plot of average price by year
 df %>%
   filter(substr(Variabel,1,1) == "a") %>%
-  mutate(Variabel = ifelse(Variabel == "aip", "Apotekets indkøbspris", "Registerpris")) %>%
+  mutate(Variabel = ifelse(Variabel == "aip", "Apotekets indkï¿½bspris", "Registerpris")) %>%
   group_by(time, Variabel) %>%
   summarise(price = mean(price, na.rm = TRUE)) %>%
   ungroup() %>%
@@ -18,8 +20,7 @@ df %>%
     xlab("Year") +
     ylab("Price (DKK)") +
   theme(legend.position = "bottom") +
-  guides(fill=guide_legend(title="Price type")) +
+  guides(color=guide_legend(title="Price type")) +
   scale_color_manual(values = c("red", "blue"))
 
 ggsave("img/averages.png")
-
