@@ -5,6 +5,8 @@ from matplotlib import dates
 import datetime
 import math
 import numpy as np
+from sklearn import linear_model as lm
+
 
 plt.style.use('bmh')
 df = pd.read_csv('raw_data.csv')
@@ -85,10 +87,6 @@ df3['time'] = pd.to_datetime(df3['time'])
 df3['date'] = df3['time'].apply(lambda x: datetime.date(x.year, x.month, x.day))
 
 
-
-from sklearn import linear_model as lm
-
-
 # these operations create a dataset of first differenced AIP prices
 df41 = df3.groupby('date')['aip'].mean().reset_index()
 
@@ -96,44 +94,48 @@ dfdiff = diff(df41['aip'], df41['date'], range(1,10))
 dflag = lag(dfdiff['L1'], dfdiff['index'], range(1,10))[10:]
 
 
-#fig, (ax1, ax2) = plt.subplots(nrows = 2, gridspec_kw = {'height_ratios': [3:1]})
-fig = plt.figure(1)
-plt.rc('text', usetex = True)
-
-ax1 = plt.subplot2grid((3,1), (0,0), rowspan = 2)
-ax2 = plt.subplot2grid((3,1), (2,0), rowspan = 1, sharex = ax1)
-ax1.set_title(r'Medicine prices over time')
-#plt.title('Medicine prices over time\n')
-ax2.plot(
-    dflag['index'],
-    dflag['L1'],
-    label = r'$\Delta$AUP'
-)
-
-ax1.set_ylabel(r'DKK')
-
-ax2.plot(dflag['index'],
-        [np.mean(dflag['L1']) for i in dflag['index']],
-        color = 'r',
-        linestyle = ':')
 
 # PLOT SIMPLE AVERAGES
 # this simply replicates the work also done in descriptive.R
-ax1.plot(df3.groupby('date')['aip'].mean().reset_index()['date'],
-         df3.groupby('date')['aip'].mean().reset_index()['aip'],
-         label = r'AIP')
-ax1.plot(df3.groupby('date')['aup'].mean().reset_index()['date'],
-         df3.groupby('date')['aup'].mean().reset_index()['aup'],
-         label = r'AUP')
 
-# remove x axis marks for large figure
-plt.setp(ax1.get_xticklabels(), visible=False)
-ax1.legend(loc = 4)
-ax2.legend(loc = 2)
+def plot_simple():
+    fig = plt.figure(1)
+    plt.rc('text', usetex = True)
 
-fig.tight_layout()
-plt.savefig('averages.png')
-plt.show()
+    ax1 = plt.subplot2grid((3,1), (0,0), rowspan = 2)
+    ax2 = plt.subplot2grid((3,1), (2,0), rowspan = 1, sharex = ax1)
+    ax1.set_title(r'Medicine prices over time')
+
+    ax2.plot(
+        dflag['index'],
+        dflag['L1'],
+        label = r'$\Delta$AUP'
+    )
+
+    ax1.set_ylabel(r'DKK')
+
+    ax2.plot(dflag['index'],
+            [np.mean(dflag['L1']) for i in dflag['index']],
+            color = 'r',
+            linestyle = ':')
+
+    ax1.plot(df3.groupby('date')['aip'].mean().reset_index()['date'],
+             df3.groupby('date')['aip'].mean().reset_index()['aip'],
+             label = r'AIP')
+    ax1.plot(df3.groupby('date')['aup'].mean().reset_index()['date'],
+             df3.groupby('date')['aup'].mean().reset_index()['aup'],
+             label = r'AUP')
+
+    # remove x axis marks for large figure
+    plt.setp(ax1.get_xticklabels(), visible=False)
+    ax1.legend(loc = 4)
+    ax2.legend(loc = 2)
+
+    fig.tight_layout()
+    plt.savefig('averages.png')
+    plt.show()
+
+plot_simple()
 
 # Plot profit margin of the pharmacies
 df3['relPrice'] = df3['aup']/df3['aip']
