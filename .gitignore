@@ -3,7 +3,9 @@
 lmpriser.xlsx
 medicine_prices.csv
 
-
+__pycache__
+test.png
+test2.png
 .ropeproject/
 
 .Rhistory
